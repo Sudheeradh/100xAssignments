@@ -7,7 +7,29 @@
 */
 
 function isPalindrome(str) {
+  str = str.toLowerCase();
+
+  arr = []
+  for (s of str) {
+    if (s >= 'a' && s <= 'z') {
+      arr.push(s);
+    }
+  }
+  str = arr.join('');
+  
+  let l = 0;
+  let r = str.length - 1;
+
+  while (r >= l) {
+    if (str[r] === str[l]) {
+      ++l;
+      --r;
+    } else {return false}
+  }
+
   return true;
 }
+
+console.log(isPalindrome('level'))
 
 module.exports = isPalindrome;
