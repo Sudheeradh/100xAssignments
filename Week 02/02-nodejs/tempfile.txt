@@ -1,0 +1,24 @@
+{
+    "email" : "jacky", 
+    "password" : "pirate",
+    "firstName" : "jack",
+    "lastName" : "sparrow"
+}
+{
+    "email" : "tlou", 
+    "password" : "ndog",
+    "firstName" : "joel",
+    "lastName" : "miller"
+}
+{
+    "email" : "GoW", 
+    "password" : "santamonica",
+    "firstName" : "kratos",
+    "lastName" : "atreus"
+}
+{
+    "email" : "uncharted", 
+    "password" : "ndog2",
+    "firstName" : "nathan",
+    "lastName" : "drake"
+}
