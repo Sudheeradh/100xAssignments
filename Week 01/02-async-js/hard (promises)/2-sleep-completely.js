@@ -3,6 +3,14 @@
  * During this time the thread should not be able to do anything else.
  */
 
-function sleep (seconds) {
 
+function sleep (seconds) {
+    t = new Date().getTime();
+    while(new Date().getTime() - t <= seconds * 1000) {}
 }
+
+t = new Date().getTime();
+
+sleep(3);
+
+console.log(((new Date().getTime() - t) / 1000), "Seconds");

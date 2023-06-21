@@ -6,17 +6,22 @@
 
 
 function waitOneSecond() {
-
+    return new Promise(res => setTimeout(res, 1000));
 }
 
 function waitTwoSecond() {
-
+    return new Promise(res => setTimeout(res, 2000));
 }
 
 function waitThreeSecond() {
-
+    return new Promise(res => setTimeout(res, 3000));
 }
 
 function calculateTime() {
-
+    t = new Date().getTime();
+    arr = [waitOneSecond(), waitTwoSecond(), waitThreeSecond()];
+    Promise.all(arr)
+    .then(v => console.log(new Date().getTime() - t));
 }
+
+calculateTime();
