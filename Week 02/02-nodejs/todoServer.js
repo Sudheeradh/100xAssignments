@@ -39,105 +39,127 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-const express = require('express');
-const bodyParser = require('body-parser');
-const fs = require('fs');
+const express = require("express");
+const bodyParser = require("body-parser");
+const fs = require("fs");
 const PORT = 3000;
-let jsonContent; 
+const path = require("path");
+let jsonContent;
 
 function readTodosFile() {
-  jsonContent = fs.readFileSync('todos.json', 'utf8');
+    jsonContent = fs.readFileSync("todos.json", "utf8");
 }
 
 const app = express();
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "todo_public")));
+
+function handleGetRoot(req, res) {
+    res.sendFile("index.html", {
+        root: path.join(__dirname, "/todo_public"),
+    });
+}
 
 function handleGetTodos(req, res) {
-  readTodosFile();
-  dataObj = JSON.parse(jsonContent);
+    readTodosFile();
+    dataObj = JSON.parse(jsonContent);
 
-  arr = []
-  for (key in dataObj) {
-    if (key != "nextId") {
-      arr.push(dataObj[key]);
+    arr = [];
+    for (key in dataObj) {
+        if (key != "nextId") {
+            arr.push(dataObj[key]);
+        }
     }
-  }
-  res.send(arr);
+    arr.sort((a, b) => parseInt(a.time) - parseInt(b.time));
+    res.send(arr);
 }
 
 function handleGetTodosId(req, res) {
-  readTodosFile();
-  dataObj = JSON.parse(jsonContent);
-  
-  if ([req.params.id] in dataObj) {
-    res.send(dataObj[req.params.id]);
-  } else {
-    res.sendStatus(404);
-  }
+    readTodosFile();
+    dataObj = JSON.parse(jsonContent);
+
+    if ([req.params.id] in dataObj) {
+        res.send(dataObj[req.params.id]);
+    } else {
+        res.sendStatus(404);
+    }
 }
 
 function handlePostTodos(req, res) {
-  readTodosFile();
-  dataObj = JSON.parse(jsonContent);
-  let currId = Math.floor(Math.random() * 100000);
-  while((currId in dataObj)){
-    currId = Math.floor(Math.random() * 100000);
-  }
-  dataObj[currId] = req.body;
-  dataObj[currId]["id"] = currId;
-  jsonContent = JSON.stringify(dataObj);
-  fs.writeFileSync("todos.json", jsonContent);
-  res.status(201).send({id: currId});
+    if (req.body.title.length === 0) {
+        res.status(400).send("Empty title");
+    } else {
+        readTodosFile();
+        dataObj = JSON.parse(jsonContent);
+        let currId = Math.floor(Math.random() * 100000);
+        while (currId in dataObj) {
+            currId = Math.floor(Math.random() * 100000);
+        }
+        dataObj[currId] = req.body;
+        dataObj[currId]["id"] = currId;
+        dataObj[currId]["time"] = Date.now();
+        jsonContent = JSON.stringify(dataObj);
+        fs.writeFileSync("todos.json", jsonContent);
+        res.status(201).send({ id: currId });
+    }
 }
 
 function handlePostTodosId(req, res) {
-  readTodosFile();
-  dataObj = JSON.parse(jsonContent);
+    readTodosFile();
+    dataObj = JSON.parse(jsonContent);
 
-  if ([req.params.id] in dataObj) {
-    dataObj[req.params.id] = req.body;
-    jsonContent = JSON.stringify(dataObj);
-    fs.writeFileSync("todos.json", jsonContent);
-    res.sendStatus(201);
-  } else {
-    res.sendStatus(404);
-  }
+    if ([req.params.id] in dataObj) {
+        dataObj[req.params.id] = req.body;
+        jsonContent = JSON.stringify(dataObj);
+        fs.writeFileSync("todos.json", jsonContent);
+        res.sendStatus(201);
+    } else {
+        res.sendStatus(404);
+    }
 }
 
 function handlePutTodos(req, res) {
-  readTodosFile();
-  dataObj = JSON.parse(jsonContent);
+    readTodosFile();
+    dataObj = JSON.parse(jsonContent);
 
-  if ([req.params.id] in dataObj) {
-    dataObj[req.params.id] = req.body;
-    jsonContent = JSON.stringify(dataObj);
-    fs.writeFileSync("todos.json", jsonContent);
-    res.sendStatus(200);
-  } else {
-    res.sendStatus(404);
-  }
+    if (req.body.title.length === 0) {
+        res.status(400).send("Empty title");
+    } else {
+        if ([req.params.id] in dataObj) {
+            dataObj[req.params.id]["title"] = req.body.title;
+            dataObj[req.params.id]["description"] = req.body.description;
+            dataObj[req.params.id]["id"] = req.params.id;
+            jsonContent = JSON.stringify(dataObj);
+            fs.writeFileSync("todos.json", jsonContent);
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(404);
+        }
+    }
 }
 
 function handleDeleteTodos(req, res) {
-  readTodosFile();
-  dataObj = JSON.parse(jsonContent);
-  if ([req.params.id] in dataObj) {
-    delete dataObj[req.params.id];
-    jsonContent = JSON.stringify(dataObj);
-    fs.writeFileSync("todos.json", jsonContent);
-    res.sendStatus(200);
-  } else {
-    res.sendStatus(404);
-  }
+    readTodosFile();
+    dataObj = JSON.parse(jsonContent);
+    if ([req.params.id] in dataObj) {
+        delete dataObj[req.params.id];
+        jsonContent = JSON.stringify(dataObj);
+        fs.writeFileSync("todos.json", jsonContent);
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(404);
+    }
 }
 
-app.get('/todos', handleGetTodos);
-app.get('/todos/:id', handleGetTodosId);
-app.post('/todos', handlePostTodos);
-app.post('/todos/:id', handlePostTodosId);
-app.put('/todos/:id', handlePutTodos);
-app.delete('/todos/:id', handleDeleteTodos);
+app.get("/", handleGetRoot);
+app.get("/todos", handleGetTodos);
+app.get("/todos/:id", handleGetTodosId);
+app.post("/todos", handlePostTodos);
+app.post("/todos/:id", handlePostTodosId);
+app.put("/todos/:id", handlePutTodos);
+app.delete("/todos/:id", handleDeleteTodos);
 
-
-
-module.exports = app;
+app.listen(PORT, () => {
+    console.log(`Listening at http://localhost:${PORT}`);
+});
+// module.exports = app;
