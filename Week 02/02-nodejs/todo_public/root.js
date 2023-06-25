@@ -1,4 +1,3 @@
-const viewAllTodosButton = document.querySelector("#viewTodos");
 const createTodosButton = document.querySelector("#createTodo");
 const todoSpace = document.querySelector("#todosSpace");
 const listElement = document.createElement("ol");
@@ -117,7 +116,6 @@ function handleEdit(btn) {
     });
 }
 
-viewAllTodosButton.addEventListener("click", fetchAndRenderTodos);
 createTodosButton.addEventListener("click", handleCreateTodo);
 
 fetchAndRenderTodos();
